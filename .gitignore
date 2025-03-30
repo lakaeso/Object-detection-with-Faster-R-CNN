@@ -1,0 +1,7 @@
+
+.vscode
+__pycache__
+tmp.*
+cifar.py
+main1.py
+VOCdevkit
