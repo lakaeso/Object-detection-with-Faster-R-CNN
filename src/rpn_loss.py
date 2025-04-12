@@ -31,32 +31,6 @@ class RPNLoss(nn.Module):
 
     def forward(self, scores: torch.Tensor, regions: torch.Tensor, anchors: torch.Tensor, ground_truth_boxes: list):
 
-        """
-        # assign scores
-        anchor_scores = np.zeros((len(ground_truth_boxes), len(anchors)))
-
-        for i, gtb in enumerate(ground_truth_boxes):
-
-            max_IoU_score = None
-            max_IoU_idx = None
-            for j, region in enumerate(regions):
-                
-                IoU_score = calculate_IoU(gtb, region)
-
-                if max_IoU_score is None or max_IoU_score < IoU_score:
-                    max_IoU_score = IoU_score
-                    max_IoU_idx = j
-
-                if IoU_score > self.iou_tresh_positive:
-                    anchor_scores[i][j] = 1
-                if IoU_score < self.iou_tresh_negative:
-                    anchor_scores[i][j] = -1
-            
-            # assign positivo to the largest IOU
-            anchor_scores[i][max_IoU_idx] = 1
-        """
-        
-
         # calc IOU scores
         iou_scores = []
         region_scores = []
@@ -102,39 +76,7 @@ class RPNLoss(nn.Module):
         # calculate cls loss
         cls_loss = self.cls(cls_true, cls_pred)
         
-        
-        """# calc cls loss
-        cls_loss = torch.tensor(0, dtype=torch.float)
-        cls_loss_cntr = 0
-        for i, _ in enumerate(ground_truth_boxes):
-            for j, _ in enumerate(anchors):
-                if anchor_scores[i][j] == 1:
-                    cls_loss += self.cls(torch.tensor([1], dtype=torch.float), scores[j])
-                    cls_loss_cntr += 1
-                if anchor_scores[i][j] == -1:
-                    cls_loss += self.cls(torch.tensor([0], dtype=torch.float), scores[j])
-                    cls_loss_cntr += 1"""
-        
-        """# reg loss ONLY for positive
-        reg_loss = torch.tensor(0, dtype=torch.float)
-        reg_loss_cntr = 0
-
-        for j, _ in enumerate(anchors):
-            if anchor_scores[j] == 1:
-                
-                # parameterise region
-                region_p = parameterise(regions[j], anchors[0])
-
-                # parameterise gtb
-                ground_truth_box_p = parameterise(ground_truth_boxes[0], anchors[0])
-
-                # add loss
-                l = self.bb(region_p, ground_truth_box_p)
-                
-                # increment counter
-                reg_loss_cntr += 1
-                reg_loss += l"""
-
+        # calculate bbox loss
         reg_loss = None
         reg_loss_cntr = 0
         
