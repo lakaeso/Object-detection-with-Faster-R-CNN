@@ -102,7 +102,9 @@ class RegionProposalNetwork(nn.Module):
 
 
 class ROIPoolingLayer(nn.Module):
-    ...
+    
+    def perform_nms(self):
+        ...
 
 
 class Classifier(nn.Module):
@@ -175,4 +177,44 @@ class FasterRCNN(nn.Module):
                 optim.step()
 
     def train_clsn(self, num_epoch, dl_train, optim, criterion):
-        ...
+        for i_epoch in range(num_epoch):
+
+            self.feature_extractor.eval()
+            self.region_proposal_network.eval()
+
+            for i_batch, (x, target_classes, ground_truth_boxes) in enumerate(dl_train):
+
+                # NOTE: tmp, for speed
+                if i_batch == 10:
+                    break
+                
+                # zero out grads
+                optim.zero_grad()
+
+                # extract features
+                with torch.no_grad():
+                    feature_map = self.feature_extractor(x)
+
+                    # get region scores, offsets and dimensions
+                    region_scores, region_offsets = self.region_proposal_network(feature_map)
+
+                    # get dims of input and output
+                    _, H_in, W_in = x.shape
+                    _, H_out, W_out = feature_map.shape
+
+                    # get anchors
+                    anchors = get_anchors(H_in, W_in, H_out, W_out)
+
+                    # add region offsets to anchors
+                    offseted_regions = anchors + region_offsets.cpu()
+
+                    # relu the regions
+                    offseted_regions = torch.relu(offseted_regions)
+                
+                # propose regions
+                proposed_regions = self.region_proposal_network.propose_regions(region_scores, offseted_regions)
+
+                # pool regions
+                self.roi_pooling_layer.perform_nms(proposed_regions)
+
+                ...
