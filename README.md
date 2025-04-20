@@ -22,13 +22,13 @@ Files can be found in src folder. Source code is split into following files:
 ## Modules implemented
 
 Main class/module is FasterRCNN. It contains the following modules:
-* FeatureExtractor
+* <b>FeatureExtractor</b>
     * Shallow CNN which outputs feature map
-* RegionProposalNetwork
+* <b>RegionProposalNetwork</b>
     * Module for region proposal
-* ROIPoolingLayer
+* <b>ROIPoolingLayer</b>
     * Module for region pooling
-* Classifier
+* <b>Classifier</b>
     * Module used for final classification task
 
 Note: this implementation is still work-in-progress. Region classification task is yet to be fully implemented.
